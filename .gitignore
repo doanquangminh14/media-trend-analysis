@@ -1,0 +1,3 @@
+#Là file cấu hình báo cho hệ thống Git biết những file hoặc thư mục nào cần được bỏ qua, 
+#không theo dõi và không đẩy lên kho lưu trữ (repository).
+# Bạn cần thêm file .env vào .gitignore ngay từ đầu để tránh lộ thông tin nhạy cảm. Ngoài ra, file này còn dùng để loại trừ các file tạm hoặc file sinh ra trong quá trình chạy code như __pycache__ hay *.pyc.
