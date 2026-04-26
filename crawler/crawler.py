@@ -3,6 +3,11 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 import time
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from sqlalchemy.dialects.postgresql import insert
+from data.database import SessionLocal, RawArticle
 
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
@@ -40,6 +45,7 @@ def crawler(url_categories):
                             'category':category
                         })
     df1 = pd.DataFrame(all_article_content)
+    df1 = df1.drop_duplicates(subset=['link'], keep='first')
     return df1 
 
 def get_content_link(df1):
@@ -65,11 +71,44 @@ def get_content_link(df1):
             })
         except AttributeError as e:
             print(f"Bỏ qua (lỗi html) {url}: {e}")
+            continue
     df2 = pd.DataFrame(all_normal_content)
     return df2
 
 def megre_df(df1,df2):
     df3 = pd.merge(df1,df2, on = 'link', how = 'left')
     return df3
+
+
+def insert_data(df3):
+    data_to_insert = df3.to_dict(orient= 'records')
+    session = SessionLocal()
+    try:
+        for row in data_to_insert:
+            stmt = insert(RawArticle).values(
+                title       = row['title'],
+                link        = row['link'],
+                category    = row['category'],
+                content     = row.get('content', None),
+                public_date = row.get('public_date', None)
+            )
+            
+            stmt = stmt.on_conflict_do_nothing(index_elements = ['link'])
+            session.execute(stmt)
+        session.commit()
+        print(f"Đã chạy xong lệnh lưu dữ liệu. Các bài trùng link sẽ tự động bị bỏ qua.")
+    except Exception as e:
+        session.rollback()
+        print(f"Lỗi khi lưu DB: {e}")
+    finally:
+        session.close()
+def run():
+    print("Bắt đầu crawl dữ liệu!!")
+    df1 = crawler(url_categories)
+    df2 = get_content_link(df1)
+    df3 = megre_df(df1,df2)
+    print("Thêm dữ liệu vào database")
+    insert_data(df3)
+    
 if __name__ == "__main__":
-    crawler()
+    run()

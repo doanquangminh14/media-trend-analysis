@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, Column, Integer, Text, DateTime, ForeignKe
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 load_dotenv()
-DB_URL = f"postpresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+DB_URL = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 
 engine = create_engine(DB_URL)
 SessionLocal = sessionmaker(autocommit = False,  autoflush = False, bind = engine)
