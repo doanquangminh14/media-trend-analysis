@@ -20,7 +20,7 @@ class RawArticle(Base):
     public_date  = Column(Text)
     created_at   = Column(DateTime(timezone=True), server_default = func.now())
     
-    processed_data = relationship("ProcessedArticle", back_populates="raw_articles")
+    processed_data = relationship("ProcessedArticle", back_populates="raw_article")
     
 class ProcessedArticle(Base):
     __tablename__ = "processed_articles"

@@ -6,16 +6,16 @@ import time
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from etl.etl import *
+from data.db_write import get_existing_link
 
 
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
 driver = webdriver.Chrome(options = chrome_options)
 url_categories = {'Thể thao':'https://vnexpress.net/the-thao',
-                  #'Kinh doanh':'https://vnexpress.net/kinh-doanh',
-                  #'Sức khỏe':'https://vnexpress.net/suc-khoe',
-                  #'Thế giới':'https://vnexpress.net/the-gioi'
+                  'Kinh doanh':'https://vnexpress.net/kinh-doanh',
+                  'Sức khỏe':'https://vnexpress.net/suc-khoe',
+                  'Thế giới':'https://vnexpress.net/the-gioi'
                   }
 
 def crawler(url_categories):

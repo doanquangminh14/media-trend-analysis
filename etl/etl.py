@@ -2,14 +2,7 @@ import re
 from data.database import *
 import unicodedata
 
-def get_existing_link():
-    session = SessionLocal()
-    try:
-        result = session.query(RawArticle.link).all()
-        links = [row[0] for row in result]
-        return set(links)
-    finally:
-        session.close()
+
         
 
 def get_unlabeled_articles(limit = 100):
