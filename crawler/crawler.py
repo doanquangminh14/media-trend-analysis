@@ -6,8 +6,6 @@ import time
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from sqlalchemy.dialects.postgresql import insert
-from data.database import SessionLocal, RawArticle, init_db
 from etl.etl import *
 
 
@@ -83,40 +81,17 @@ def merge_df(df1,df2):
     return df3
 
 
-def insert_data(df3):
-    data_to_insert = df3.to_dict(orient= 'records')
-    session = SessionLocal()
-    try:
-        for row in data_to_insert:
-            stmt = insert(RawArticle).values(
-                title       = row['title'],
-                link        = row['link'],
-                category    = row['category'],
-                content     = row.get('content', None),
-                public_date = row.get('public_date', None)
-            )  
-            stmt = stmt.on_conflict_do_nothing(index_elements = ['link'])
-            session.execute(stmt)
-        session.commit()
-        print(f"Đã chạy xong lệnh lưu dữ liệu. Các bài trùng link sẽ tự động bị bỏ qua.")
-    except Exception as e:
-        session.rollback()
-        print(f"Lỗi khi lưu DB: {e}")
-    finally:
-        session.close()
 def run():
-    init_db()
     df1 = crawler(url_categories)
     existing_links = get_existing_link()
     df1_filtered = df1[~df1['link'].isin(existing_links)]
     print(f"Tổng bài crawl được: {len(df1)}")
     print(f"Bài đã có trong DB: {len(df1) - len(df1_filtered)}")
     print(f"Bài mới sẽ crawl conent: {len(df1_filtered)}")
-    
     if df1_filtered.empty:
         print("Không có bài mới!!")
         return
     df2 = get_content_link(df1_filtered)
     df3 = merge_df(df1_filtered,df2)
-    insert_data(df3)
     driver.quit()
+    return df3
